@@ -1,4 +1,4 @@
-import {
+ import {
   collection,
   addDoc,
   doc,
@@ -16,10 +16,10 @@ import { db } from "./firebaseConfig";
 
 const SOLICITUDES = "solicitudes";
 const USUARIOS = "usuarios";
-const MOTORISTAS_AUTORIZADOS = "motoristas_autorizados";
 
-function normalizarTelefono(telefono) {
-  return telefono.replace(/\D/g, "").slice(-9);
+export function telefonoAEmail(telefono) {
+  const digitos = telefono.replace(/\D/g, "");
+  return `${digitos}@aquafleet.app`;
 }
 
 export function escucharPendientes(callback) {
@@ -55,38 +55,15 @@ export async function obtenerPerfil(uid) {
   return snap.exists() ? snap.data() : null;
 }
 
-export async function autorizarMotorista({ telefono, nombre }) {
-  const id = normalizarTelefono(telefono);
-  await setDoc(doc(db, MOTORISTAS_AUTORIZADOS, id), {
-    telefono,
-    nombre,
-    activado: false,
-    createdAt: serverTimestamp(),
-  });
+export async function crearPerfilMotorista(uid, { nombre, telefono }) {
+  const perfil = { rol: "motorista", nombre, telefono, createdAt: serverTimestamp() };
+  await setDoc(doc(db, USUARIOS, uid), perfil);
+  return perfil;
 }
 
-export async function revocarAutorizacion(telefono) {
-  const id = normalizarTelefono(telefono);
-  await deleteDoc(doc(db, MOTORISTAS_AUTORIZADOS, id));
-}
-
-export function escucharMotoristasAutorizados(callback) {
-  return onSnapshot(collection(db, MOTORISTAS_AUTORIZADOS), (snap) => {
+export async function listarMotoristas(callback) {
+  const q = query(collection(db, USUARIOS), where("rol", "==", "motorista"));
+  return onSnapshot(q, (snap) => {
     callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   });
-}
-
-export async function verificarYActivarMotorista(uid, telefonoLogin) {
-  const perfilExistente = await obtenerPerfil(uid);
-  if (perfilExistente?.rol === "motorista") return perfilExistente;
-
-  const id = normalizarTelefono(telefonoLogin);
-  const autorizacionSnap = await getDoc(doc(db, MOTORISTAS_AUTORIZADOS, id));
-  if (!autorizacionSnap.exists()) return null;
-
-  const { nombre, telefono } = autorizacionSnap.data();
-  const perfilNuevo = { rol: "motorista", nombre, telefono, activadoAt: serverTimestamp() };
-  await setDoc(doc(db, USUARIOS, uid), perfilNuevo);
-  await setDoc(doc(db, MOTORISTAS_AUTORIZADOS, id), { activado: true }, { merge: true });
-  return perfilNuevo;
-                    }
+      }
