@@ -45,8 +45,8 @@ export default function LoginMotorista({ onLoginExitoso }) {
       confirmationResultRef.current = await signInWithPhoneNumber(auth, numeroCompleto, verifier);
       setPaso("codigo");
     } catch (err) {
-      setError("No se pudo enviar el código. Intenta de nuevo.");
-    } finally {
+      setError("Error: " + err.code + " — " + err.message);
+      } finally {
       setCargando(false);
     }
   }
