@@ -110,16 +110,16 @@ export default function MotoristaDashboard({ motorista }) {
           </span>
         </div>
         <h1 className="text-2xl font-semibold mb-1" style={{ color: COLORS.ink }}>
-          Solicitudes cerca de ti
+          Pedidos perto de ti
         </h1>
         <p className="text-sm mb-6 flex items-center gap-1" style={{ color: COLORS.clayDark }}>
           {buscandoUbicacion ? (
             <React.Fragment>
-              <Loader2 size={13} className="animate-spin" /> Localizando tu posición...
+              <Loader2 size={13} className="animate-spin" /> A localizar a tua posição...
             </React.Fragment>
           ) : (
             <React.Fragment>
-              <Navigation size={13} /> Ordenadas por distancia
+              <Navigation size={13} /> Ordenados por distância
             </React.Fragment>
           )}
         </p>
@@ -135,7 +135,7 @@ export default function MotoristaDashboard({ motorista }) {
             className="rounded-xl p-6 text-center text-sm flex items-center justify-center gap-2"
             style={{ background: "#fff", border: `1px solid ${COLORS.line}`, color: COLORS.clayDark }}
           >
-            <Loader2 size={14} className="animate-spin" /> Cargando solicitudes...
+            <Loader2 size={14} className="animate-spin" /> A carregar pedidos...
           </div>
         )}
 
@@ -144,7 +144,7 @@ export default function MotoristaDashboard({ motorista }) {
             className="rounded-xl p-6 text-center text-sm"
             style={{ background: "#fff", border: `1px solid ${COLORS.line}`, color: COLORS.clayDark }}
           >
-            No hay solicitudes pendientes por ahora.
+            Não há pedidos pendentes por agora.
           </div>
         )}
 
@@ -161,7 +161,7 @@ export default function MotoristaDashboard({ motorista }) {
                     {s.clienteNombre || s.clienteTelefono}
                   </p>
                   <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: COLORS.clayDark }}>
-                    <MapPin size={12} /> {s.direccionTexto || "Ver ubicación en el mapa"}
+                    <MapPin size={12} /> {s.direccionTexto || "Ver localização no mapa"}
                   </p>
                 </div>
                 <span
@@ -180,7 +180,7 @@ export default function MotoristaDashboard({ motorista }) {
                   <Navigation size={12} /> {s.distancia ? s.distancia.toFixed(1) : "—"} km
                 </span>
                 <span className="flex items-center gap-1">
-                  <Clock size={12} /> hace {minutosDesde(Date.now())} min
+                  <Clock size={12} /> há {minutosDesde(Date.now())} min
                 </span>
               </div>
 
@@ -191,7 +191,7 @@ export default function MotoristaDashboard({ motorista }) {
                 className="w-full rounded-lg py-2 mb-2 text-xs font-medium flex items-center justify-center gap-1.5"
                 style={{ background: COLORS.paper, border: `1px solid ${COLORS.line}`, color: COLORS.ink }}
               >
-                <MapPin size={13} /> Ver ubicación en el mapa
+                <MapPin size={13} /> Ver localização no mapa
               </a>
 
               <div className="flex gap-2">
@@ -200,7 +200,7 @@ export default function MotoristaDashboard({ motorista }) {
                   className="flex-1 rounded-lg py-2.5 text-sm font-medium flex items-center justify-center gap-1.5"
                   style={{ background: COLORS.paper, border: "1px solid " + COLORS.cobalt, color: COLORS.cobalt }}
                 >
-                  <Phone size={14} /> Llamar
+                  <Phone size={14} /> Ligar
                 </button>
                 <button
                   onClick={() => tomarPedido(s.id)}
@@ -210,10 +210,10 @@ export default function MotoristaDashboard({ motorista }) {
                 >
                   {tomandoId === s.id ? (
                     <React.Fragment>
-                      <Loader2 size={14} className="animate-spin" /> Tomando...
+                      <Loader2 size={14} className="animate-spin" /> A aceitar...
                     </React.Fragment>
                   ) : (
-                    "Tomar pedido"
+                    "Aceitar pedido"
                   )}
                 </button>
               </div>
@@ -229,7 +229,7 @@ export default function MotoristaDashboard({ motorista }) {
         {misPedidosTomados.length > 0 && (
           <div className="mt-6">
             <p className="text-xs uppercase tracking-wide mb-2" style={{ color: COLORS.clayDark }}>
-              Tomados por ti
+              Aceites por ti
             </p>
             <div className="space-y-2">
               {misPedidosTomados.map((s) => (
@@ -254,4 +254,4 @@ export default function MotoristaDashboard({ motorista }) {
       </div>
     </div>
   );
-                }
+}
