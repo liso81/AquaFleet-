@@ -22,7 +22,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState("");
   const [solicitudId, setSolicitudId] = useState(null);
-  const [estadoPedido, setEstadoPedido] = useState("pendiente");
+  const [estadoPedido, setEstadoPedido] = useState("pendente");
   const [motorista, setMotorista] = useState(null);
 
   function actualizarMiles(raw) {
@@ -38,7 +38,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
   function capturarUbicacion() {
     setError("");
     if (!navigator.geolocation) {
-      setError("Este dispositivo no soporta geolocalización.");
+      setError("Este dispositivo não suporta geolocalização.");
       return;
     }
     setBuscandoUbicacion(true);
@@ -51,7 +51,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
         setBuscandoUbicacion(false);
       },
       () => {
-        setError("No se pudo obtener la ubicación. Actívala en ajustes.");
+        setError("Não foi possível obter a localização. Ative-a nas definições.");
         setBuscandoUbicacion(false);
       },
       { enableHighAccuracy: false, timeout: 6000 }
@@ -62,11 +62,11 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     e.preventDefault();
     setError("");
     if (!ubicacion) {
-      setError("Primero comparte tu ubicación.");
+      setError("Primeiro partilhe a sua localização.");
       return;
     }
     if (telefono.trim().length < 9) {
-      setError("Ingresa un número de teléfono válido.");
+      setError("Insira um número de telefone válido.");
       return;
     }
 
@@ -80,12 +80,12 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
         ubicacion,
       });
       setSolicitudId(docRef.id);
-      setEstadoPedido("pendiente");
+      setEstadoPedido("pendente");
       setMotorista(null);
       setEnviado(true);
       if (onSubmit) onSubmit({ id: docRef.id });
     } catch (err) {
-      setError("No se pudo enviar la solicitud. Intenta de nuevo.");
+      setError("Não foi possível enviar o pedido. Tente novamente.");
     } finally {
       setEnviando(false);
     }
@@ -109,7 +109,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
         className="min-h-screen flex items-center justify-center px-6"
       >
         <div className="max-w-sm w-full text-center">
-          {estadoPedido === "pendiente" ? (
+          {estadoPedido === "pendente" ? (
             <>
               <div className="relative mx-auto mb-4 w-14 h-14 flex items-center justify-center">
                 <div
@@ -119,13 +119,13 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                 <Clock size={30} color={COLORS.cobalt} strokeWidth={1.5} />
               </div>
               <h1 className="text-2xl font-semibold mb-2" style={{ color: COLORS.ink }}>
-                Buscando motorista
+                À procura de motorista
               </h1>
               <p className="text-sm mb-6" style={{ color: COLORS.clayDark }}>
-                Tu pedido está visible para los motoristas cercanos. En cuanto uno lo tome, te
-                avisamos aquí y te va a llamar al{" "}
+                O seu pedido está visível para os motoristas próximos. Assim que alguém o aceitar,
+                avisamos aqui e vai ligar para o{" "}
                 <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{telefono}</span> para
-                acordar el precio.
+                combinar o preço.
               </p>
               <button
                 onClick={async () => {
@@ -136,17 +136,17 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                 className="text-sm underline mb-6"
                 style={{ color: COLORS.clayDark }}
               >
-                Cancelar solicitud
+                Cancelar pedido
               </button>
             </>
           ) : (
             <>
               <CheckCircle2 size={56} color={COLORS.cobalt} className="mx-auto mb-4" strokeWidth={1.5} />
               <h1 className="text-2xl font-semibold mb-2" style={{ color: COLORS.ink }}>
-                Tu pedido fue tomado
+                O seu pedido foi aceite
               </h1>
               <p className="text-sm mb-6" style={{ color: COLORS.clayDark }}>
-                {motorista?.nombre} va a llamarte para acordar el precio y la hora de entrega.
+                {motorista?.nombre} vai ligar para combinar o preço e a hora de entrega.
               </p>
               <div
                 className="rounded-xl p-4 flex items-center gap-3 mb-4 text-left"
@@ -175,7 +175,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
             style={{ background: "#fff", border: `1px solid ${COLORS.line}`, fontFamily: "'JetBrains Mono', monospace" }}
           >
             <div className="flex justify-between mb-1">
-              <span style={{ color: COLORS.clayDark }}>cantidad</span>
+              <span style={{ color: COLORS.clayDark }}>quantidade</span>
               <span style={{ color: COLORS.ink }}>{(litros / 1000).toLocaleString()} mil L</span>
             </div>
             <div className="flex justify-between">
@@ -191,13 +191,13 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
               setTelefono("");
               setLitros(0);
               setMilesInput("0");
-              setEstadoPedido("pendiente");
+              setEstadoPedido("pendente");
               setMotorista(null);
             }}
             className="mt-6 text-sm underline"
             style={{ color: COLORS.cobalt }}
           >
-            Hacer otra solicitud
+            Fazer outro pedido
           </button>
         </div>
       </div>
@@ -225,13 +225,13 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
           </span>
         </div>
         <h1 className="text-2xl font-semibold mb-6" style={{ color: COLORS.ink }}>
-          Pedir agua
+          Pedir água
         </h1>
 
         <form onSubmit={enviarSolicitud} className="space-y-6">
           <div>
             <label className="text-sm font-medium block mb-2" style={{ color: COLORS.ink }}>
-              Inserte la cantidad de litros que desea
+              Insira a quantidade de litros que deseja
             </label>
             <div
               className="mt-2 rounded-xl flex items-center justify-center gap-2 py-6"
@@ -260,7 +260,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
 
           <div>
             <label className="text-xs uppercase tracking-wide" style={{ color: COLORS.clayDark }}>
-              Ubicación de entrega
+              Local de entrega
             </label>
             <button
               type="button"
@@ -275,10 +275,10 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
               <span className="flex items-center gap-2 text-sm" style={{ color: COLORS.ink }}>
                 <MapPin size={16} color={ubicacion ? COLORS.cobalt : COLORS.clayDark} />
                 {buscandoUbicacion
-                  ? "Buscando ubicación..."
+                  ? "A procurar localização..."
                   : ubicacion
                   ? `${ubicacion.lat.toFixed(5)}, ${ubicacion.lng.toFixed(5)}`
-                  : "Compartir mi ubicación"}
+                  : "Partilhar a minha localização"}
               </span>
               {buscandoUbicacion && <Loader2 size={16} className="animate-spin" color={COLORS.cobalt} />}
             </button>
@@ -286,7 +286,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
 
           <div>
             <label className="text-xs uppercase tracking-wide" style={{ color: COLORS.clayDark }}>
-              Teléfono
+              Telefone
             </label>
             <div
               className="mt-2 flex items-center rounded-xl px-4"
@@ -319,7 +319,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
               color: "#fff",
             }}
           >
-            {enviando ? "Enviando..." : "Solicitar agua"}
+            {enviando ? "A enviar..." : "Pedir água"}
           </button>
         </form>
       </div>
