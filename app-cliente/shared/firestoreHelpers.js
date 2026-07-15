@@ -17,7 +17,7 @@ export async function crearSolicitud({ clienteId, clienteTelefono, cantidadLitro
     cantidadLitros,
     ubicacion,
     direccionTexto: direccionTexto ?? null,
-    estado: "pendiente",
+    estado: "pendente",
     motoristaId: null,
     motoristaNombre: null,
     motoristaTelefono: null,
