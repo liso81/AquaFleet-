@@ -26,9 +26,6 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
   const [estadoPedido, setEstadoPedido] = useState("pendente");
   const [motorista, setMotorista] = useState(null);
 
-  // ── Al abrir la app, revisa si ya hay un pedido activo de este cliente ──
-  // Evita que pueda crear varios pedidos a la vez (lo que llamaría a
-  // varios motoristas para la misma persona).
   useEffect(() => {
     if (!clienteId) return;
     buscarSolicitudActiva(clienteId).then((activa) => {
@@ -199,6 +196,17 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                   </p>
                 </div>
               </div>
+              <button
+                onClick={async () => {
+                  await cancelarSolicitud(solicitudId);
+                  setEnviado(false);
+                  setSolicitudId(null);
+                }}
+                className="text-sm underline mb-6"
+                style={{ color: COLORS.clayDark }}
+              >
+                Cancelar pedido
+              </button>
             </>
           )}
 
