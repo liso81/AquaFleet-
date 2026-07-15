@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+ import React, { useState, useEffect, useMemo } from "react";
 import { MapPin, Phone, Droplet, Loader2, Navigation, Clock, CheckCircle2 } from "lucide-react";
 import { escucharPendientes, tomarPedido as tomarPedidoFirestore } from "./shared/firestoreHelpers";
 
@@ -36,6 +36,7 @@ export default function MotoristaDashboard({ motorista }) {
   const [misPedidosTomados, setMisPedidosTomados] = useState([]);
   const [tomandoId, setTomandoId] = useState(null);
   const [errorPorId, setErrorPorId] = useState({});
+  const [errorCarga, setErrorCarga] = useState("");
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -51,8 +52,6 @@ export default function MotoristaDashboard({ motorista }) {
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }, []);
-
-   const [errorCarga, setErrorCarga] = useState("");
 
   useEffect(() => {
     const unsubscribe = escucharPendientes(
@@ -125,11 +124,13 @@ export default function MotoristaDashboard({ motorista }) {
           )}
         </p>
 
-         {errorCarga && (
+        {errorCarga && (
           <div className="rounded-xl p-4 text-sm mb-4" style={{ background: "#FDECEA", color: COLORS.clay }}>
             {errorCarga}
           </div>
         )}
+
+        {cargandoSolicitudes && (
           <div
             className="rounded-xl p-6 text-center text-sm flex items-center justify-center gap-2"
             style={{ background: "#fff", border: `1px solid ${COLORS.line}`, color: COLORS.clayDark }}
@@ -182,6 +183,16 @@ export default function MotoristaDashboard({ motorista }) {
                   <Clock size={12} /> hace {minutosDesde(Date.now())} min
                 </span>
               </div>
+
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${s.ubicacion.lat},${s.ubicacion.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full rounded-lg py-2 mb-2 text-xs font-medium flex items-center justify-center gap-1.5"
+                style={{ background: COLORS.paper, border: `1px solid ${COLORS.line}`, color: COLORS.ink }}
+              >
+                <MapPin size={13} /> Ver ubicación en el mapa
+              </a>
 
               <div className="flex gap-2">
                 <button
@@ -243,4 +254,4 @@ export default function MotoristaDashboard({ motorista }) {
       </div>
     </div>
   );
-}
+                }
