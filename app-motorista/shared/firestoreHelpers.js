@@ -22,16 +22,22 @@ export function telefonoAEmail(telefono) {
   return `${digitos}@aquafleet.app`;
 }
 
-export function escucharPendientes(callback) {
+ export function escucharPendientes(callback, onError) {
   const q = query(
     collection(db, SOLICITUDES),
     where("estado", "==", "pendiente"),
     orderBy("createdAt", "desc")
   );
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-  });
-}
+  return onSnapshot(
+    q,
+    (snap) => {
+      callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    },
+    (error) => {
+      if (onError) onError(error);
+    }
+  );
+ }
 
 export async function tomarPedido(solicitudId, motorista) {
   const ref = doc(db, SOLICITUDES, solicitudId);
