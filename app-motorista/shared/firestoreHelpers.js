@@ -22,10 +22,10 @@ export function telefonoAEmail(telefono) {
   return `${digitos}@aquafleet.app`;
 }
 
- export function escucharPendientes(callback, onError) {
+export function escucharPendientes(callback, onError) {
   const q = query(
     collection(db, SOLICITUDES),
-    where("estado", "==", "pendiente"),
+    where("estado", "==", "pendente"),
     orderBy("createdAt", "desc")
   );
   return onSnapshot(
@@ -37,14 +37,14 @@ export function telefonoAEmail(telefono) {
       if (onError) onError(error);
     }
   );
- }
+}
 
 export async function tomarPedido(solicitudId, motorista) {
   const ref = doc(db, SOLICITUDES, solicitudId);
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
-    if (!snap.exists() || snap.data().estado !== "pendiente") {
-      throw new Error("Este pedido ya fue tomado por otro motorista.");
+    if (!snap.exists() || snap.data().estado !== "pendente") {
+      throw new Error("Este pedido já foi aceite por outro motorista.");
     }
     tx.update(ref, {
       estado: "contactado",
@@ -67,9 +67,9 @@ export async function crearPerfilMotorista(uid, { nombre, telefono }) {
   return perfil;
 }
 
-export async function listarMotoristas(callback) {
+export function listarMotoristas(callback) {
   const q = query(collection(db, USUARIOS), where("rol", "==", "motorista"));
   return onSnapshot(q, (snap) => {
     callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   });
-      }
+}
