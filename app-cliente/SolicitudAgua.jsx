@@ -1,6 +1,6 @@
  import React, { useState, useEffect } from "react";
 import { MapPin, Droplet, Phone, Loader2, CheckCircle2, Truck, Clock } from "lucide-react";
-import { crearSolicitud, escucharSolicitud, cancelarSolicitud } from "./shared/firestoreHelpers";
+import { crearSolicitud, escucharSolicitud, cancelarSolicitud, buscarSolicitudActiva } from "./shared/firestoreHelpers";
 
 const COLORS = {
   clay: "#B5622A",
@@ -13,6 +13,7 @@ const COLORS = {
 };
 
 export default function SolicitudAgua({ clienteId, onSubmit }) {
+  const [verificandoActiva, setVerificandoActiva] = useState(true);
   const [litros, setLitros] = useState(0);
   const [milesInput, setMilesInput] = useState("0");
   const [telefono, setTelefono] = useState("");
@@ -24,6 +25,26 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
   const [solicitudId, setSolicitudId] = useState(null);
   const [estadoPedido, setEstadoPedido] = useState("pendente");
   const [motorista, setMotorista] = useState(null);
+
+  // ── Al abrir la app, revisa si ya hay un pedido activo de este cliente ──
+  // Evita que pueda crear varios pedidos a la vez (lo que llamaría a
+  // varios motoristas para la misma persona).
+  useEffect(() => {
+    if (!clienteId) return;
+    buscarSolicitudActiva(clienteId).then((activa) => {
+      if (activa) {
+        setSolicitudId(activa.id);
+        setEstadoPedido(activa.estado);
+        setTelefono(activa.clienteTelefono || "");
+        setLitros(activa.cantidadLitros || 0);
+        if (activa.motoristaId) {
+          setMotorista({ nombre: activa.motoristaNombre, telefono: activa.motoristaTelefono });
+        }
+        setEnviado(true);
+      }
+      setVerificandoActiva(false);
+    });
+  }, [clienteId]);
 
   function actualizarMiles(raw) {
     let limpio = raw.replace(/[^0-9.]/g, "");
@@ -101,6 +122,17 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     });
     return () => unsubscribe();
   }, [solicitudId]);
+
+  if (verificandoActiva) {
+    return (
+      <div
+        style={{ background: COLORS.paper }}
+        className="min-h-screen flex items-center justify-center"
+      >
+        <Loader2 size={24} className="animate-spin" color={COLORS.cobalt} />
+      </div>
+    );
+  }
 
   if (enviado) {
     return (
@@ -183,22 +215,6 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
               <span style={{ color: COLORS.cobalt }}>{estadoPedido}</span>
             </div>
           </div>
-          <button
-            onClick={() => {
-              setEnviado(false);
-              setSolicitudId(null);
-              setUbicacion(null);
-              setTelefono("");
-              setLitros(0);
-              setMilesInput("0");
-              setEstadoPedido("pendente");
-              setMotorista(null);
-            }}
-            className="mt-6 text-sm underline"
-            style={{ color: COLORS.cobalt }}
-          >
-            Fazer outro pedido
-          </button>
         </div>
       </div>
     );
