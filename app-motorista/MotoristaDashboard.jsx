@@ -52,11 +52,19 @@ export default function MotoristaDashboard({ motorista }) {
     );
   }, []);
 
+   const [errorCarga, setErrorCarga] = useState("");
+
   useEffect(() => {
-    const unsubscribe = escucharPendientes((lista) => {
-      setSolicitudes(lista);
-      setCargandoSolicitudes(false);
-    });
+    const unsubscribe = escucharPendientes(
+      (lista) => {
+        setSolicitudes(lista);
+        setCargandoSolicitudes(false);
+      },
+      (error) => {
+        setErrorCarga(error.code + ": " + error.message);
+        setCargandoSolicitudes(false);
+      }
+    );
     return () => unsubscribe();
   }, []);
 
@@ -117,7 +125,11 @@ export default function MotoristaDashboard({ motorista }) {
           )}
         </p>
 
-        {cargandoSolicitudes && (
+         {errorCarga && (
+          <div className="rounded-xl p-4 text-sm mb-4" style={{ background: "#FDECEA", color: COLORS.clay }}>
+            {errorCarga}
+          </div>
+        )}
           <div
             className="rounded-xl p-6 text-center text-sm flex items-center justify-center gap-2"
             style={{ background: "#fff", border: `1px solid ${COLORS.line}`, color: COLORS.clayDark }}
