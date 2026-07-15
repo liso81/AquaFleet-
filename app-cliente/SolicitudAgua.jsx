@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+ import React, { useState, useEffect } from "react";
 import { MapPin, Droplet, Phone, Loader2, CheckCircle2, Truck, Clock } from "lucide-react";
-import { crearSolicitud, escucharSolicitud } from "./shared/firestoreHelpers";
+import { crearSolicitud, escucharSolicitud, cancelarSolicitud } from "./shared/firestoreHelpers";
 
 const COLORS = {
   clay: "#B5622A",
@@ -44,14 +44,17 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     setBuscandoUbicacion(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUbicacion({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setUbicacion({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
         setBuscandoUbicacion(false);
       },
       () => {
         setError("No se pudo obtener la ubicación. Actívala en ajustes.");
         setBuscandoUbicacion(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: false, timeout: 6000 }
     );
   }
 
@@ -124,6 +127,17 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                 <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{telefono}</span> para
                 acordar el precio.
               </p>
+              <button
+                onClick={async () => {
+                  await cancelarSolicitud(solicitudId);
+                  setEnviado(false);
+                  setSolicitudId(null);
+                }}
+                className="text-sm underline mb-6"
+                style={{ color: COLORS.clayDark }}
+              >
+                Cancelar solicitud
+              </button>
             </>
           ) : (
             <>
@@ -311,4 +325,4 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
       </div>
     </div>
   );
-                                       }
+}
