@@ -23,23 +23,22 @@ export default function LoginMotorista() {
     e.preventDefault();
     setError("");
     if (telefono.replace(/\D/g, "").length < 9) {
-      setError("Ingresa un número de teléfono válido.");
+      setError("Insira um número de telefone válido.");
       return;
     }
     if (contrasena.length < 6) {
-      setError("Ingresa tu contraseña.");
+      setError("Insira a sua senha.");
       return;
     }
     setCargando(true);
     try {
       const email = telefonoAEmail(telefono);
       await signInWithEmailAndPassword(auth, email, contrasena);
-      // onAuthStateChanged en App.jsx reacciona solo al login exitoso
     } catch (err) {
       if (err.code === "auth/invalid-credential") {
-        setError("Número o contraseña incorrectos.");
+        setError("Número ou senha incorretos.");
       } else {
-        setError("No se pudo iniciar sesión. Intenta de nuevo.");
+        setError("Não foi possível iniciar sessão. Tente novamente.");
       }
     } finally {
       setCargando(false);
@@ -59,9 +58,9 @@ export default function LoginMotorista() {
         </div>
 
         <form onSubmit={handleLogin}>
-          <h1 className="text-2xl font-semibold mb-1 text-center" style={{ color: COLORS.ink }}>Iniciar sesión</h1>
+          <h1 className="text-2xl font-semibold mb-1 text-center" style={{ color: COLORS.ink }}>Iniciar sessão</h1>
           <p className="text-sm mb-6 text-center" style={{ color: COLORS.clayDark }}>
-            Ingresa el número y la contraseña que te dio el administrador
+            Insira o número e a senha que o administrador lhe deu
           </p>
           <div className="flex items-center rounded-xl px-4 mb-3" style={{ background: "#fff", border: `1px solid ${COLORS.line}` }}>
             <span className="text-sm mr-1" style={{ color: COLORS.clayDark, fontFamily: "'JetBrains Mono', monospace" }}>+244</span>
@@ -79,7 +78,7 @@ export default function LoginMotorista() {
             <Lock size={16} color={COLORS.clayDark} />
             <input
               type="password"
-              placeholder="Contraseña"
+              placeholder="Senha"
               value={contrasena}
               onChange={(e) => setContrasena(e.target.value)}
               className="w-full bg-transparent py-3 px-3 outline-none text-sm"
@@ -94,10 +93,10 @@ export default function LoginMotorista() {
             style={{ background: cargando ? COLORS.clayDark : COLORS.clay }}
           >
             {cargando ? <Loader2 size={16} className="animate-spin" /> : null}
-            {cargando ? "Ingresando..." : "Entrar"}
+            {cargando ? "A entrar..." : "Entrar"}
           </button>
         </form>
       </div>
     </div>
   );
-  }
+}
