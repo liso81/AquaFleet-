@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+ import React, { useState, useEffect } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { Loader2, Droplet, LogOut } from "lucide-react";
 import { auth } from "./shared/firebaseConfig";
@@ -63,12 +63,12 @@ export default function App() {
           <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "#F3E3DC" }}>
             <Droplet size={20} color={COLORS.clay} />
           </div>
-          <h1 className="text-xl font-semibold mb-2" style={{ color: COLORS.ink }}>Cuenta no autorizada</h1>
+          <h1 className="text-xl font-semibold mb-2" style={{ color: COLORS.ink }}>Conta não autorizada</h1>
           <p className="text-sm mb-6" style={{ color: COLORS.clayDark }}>
-            Esta cuenta no está registrada como motorista. Contacta al administrador de tu flota.
+            Esta conta não está registada como motorista. Contacte o administrador da sua frota.
           </p>
           <button onClick={cerrarSesion} className="text-sm underline" style={{ color: COLORS.cobalt }}>
-            Volver a intentar
+            Tentar novamente
           </button>
         </div>
       </div>
@@ -80,10 +80,10 @@ export default function App() {
       <div className="flex items-center justify-between px-5 py-3" style={{ background: "#fff", borderBottom: `1px solid ${COLORS.line}` }}>
         <span className="text-sm font-medium" style={{ color: COLORS.ink }}>{motorista.nombre}</span>
         <button onClick={cerrarSesion} className="flex items-center gap-1 text-xs" style={{ color: COLORS.clayDark }}>
-          <LogOut size={13} /> Salir
+          <LogOut size={13} /> Sair
         </button>
       </div>
       <MotoristaDashboard motorista={motorista} />
     </div>
   );
-} 
+}
