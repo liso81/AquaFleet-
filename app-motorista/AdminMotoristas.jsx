@@ -13,13 +13,6 @@ const COLORS = {
   line: "#E3D9C8",
 };
 
-// ── Panel de administrador ──
-// Crea la cuenta del motorista directamente con email técnico (basado
-// en el teléfono) + contraseña que vos elegís. Se la compartís al
-// motorista por WhatsApp o en persona para que inicie sesión.
-//
-// Nota: esta pantalla no debería quedar pública en producción.
-
 export default function AdminMotoristas() {
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -30,9 +23,8 @@ export default function AdminMotoristas() {
   const [motoristas, setMotoristas] = useState([]);
 
   useEffect(() => {
-    let unsubscribe;
-    listarMotoristas((lista) => setMotoristas(lista)).then((u) => (unsubscribe = u));
-    return () => unsubscribe && unsubscribe();
+    const unsubscribe = listarMotoristas((lista) => setMotoristas(lista));
+    return () => unsubscribe();
   }, []);
 
   async function handleCrear(e) {
@@ -40,15 +32,15 @@ export default function AdminMotoristas() {
     setError("");
     setExito("");
     if (nombre.trim().length < 2) {
-      setError("Ingresa el nombre del motorista.");
+      setError("Insira o nome do motorista.");
       return;
     }
     if (telefono.replace(/\D/g, "").length < 9) {
-      setError("Ingresa un número de teléfono válido.");
+      setError("Insira um número de telefone válido.");
       return;
     }
     if (contrasena.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
+      setError("A senha deve ter pelo menos 6 caracteres.");
       return;
     }
     setGuardando(true);
@@ -56,15 +48,15 @@ export default function AdminMotoristas() {
       const email = telefonoAEmail(telefono);
       const cred = await createUserWithEmailAndPassword(auth, email, contrasena);
       await crearPerfilMotorista(cred.user.uid, { nombre: nombre.trim(), telefono: `+244${telefono.replace(/\D/g, "")}` });
-      setExito(`Cuenta creada. Compartile al motorista: usuario ${telefono.replace(/\D/g, "")}, contraseña ${contrasena}`);
+      setExito(`Conta criada. Partilhe com o motorista: número ${telefono.replace(/\D/g, "")}, senha ${contrasena}`);
       setNombre("");
       setTelefono("");
       setContrasena("");
     } catch (err) {
       if (err.code === "auth/email-already-in-use") {
-        setError("Ese número ya tiene una cuenta creada.");
+        setError("Esse número já tem uma conta criada.");
       } else {
-        setError("No se pudo crear la cuenta: " + err.message);
+        setError("Não foi possível criar a conta: " + err.message);
       }
     } finally {
       setGuardando(false);
@@ -83,14 +75,14 @@ export default function AdminMotoristas() {
           </span>
         </div>
         <h1 className="text-2xl font-semibold mb-6" style={{ color: COLORS.ink }}>
-          Crear motorista
+          Criar motorista
         </h1>
 
         <form onSubmit={handleCrear} className="space-y-3 mb-8">
           <div className="rounded-xl px-4 py-3" style={{ background: "#fff", border: `1px solid ${COLORS.line}` }}>
             <input
               type="text"
-              placeholder="Nombre completo"
+              placeholder="Nome completo"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               className="w-full bg-transparent outline-none text-sm"
@@ -111,7 +103,7 @@ export default function AdminMotoristas() {
           <div className="rounded-xl px-4 py-3" style={{ background: "#fff", border: `1px solid ${COLORS.line}` }}>
             <input
               type="text"
-              placeholder="Contraseña (mín. 6 caracteres)"
+              placeholder="Senha (mín. 6 caracteres)"
               value={contrasena}
               onChange={(e) => setContrasena(e.target.value)}
               className="w-full bg-transparent outline-none text-sm"
@@ -127,11 +119,11 @@ export default function AdminMotoristas() {
             style={{ background: guardando ? COLORS.clayDark : COLORS.clay }}
           >
             {guardando ? <Loader2 size={15} className="animate-spin" /> : <UserPlus size={15} />}
-            {guardando ? "Creando..." : "Crear motorista"}
+            {guardando ? "A criar..." : "Criar motorista"}
           </button>
         </form>
 
-        <p className="text-xs uppercase tracking-wide mb-2" style={{ color: COLORS.clayDark }}>Motoristas activos</p>
+        <p className="text-xs uppercase tracking-wide mb-2" style={{ color: COLORS.clayDark }}>Motoristas ativos</p>
         <div className="space-y-2">
           {motoristas.map((m) => (
             <div key={m.id} className="rounded-lg p-3 flex items-center gap-2 text-sm" style={{ background: "#fff", border: `1px solid ${COLORS.line}` }}>
