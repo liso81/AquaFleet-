@@ -40,6 +40,10 @@ export async function cancelarSolicitud(solicitudId) {
   await updateDoc(doc(db, SOLICITUDES, solicitudId), { estado: "cancelado" });
 }
 
+export async function marcarEntregado(solicitudId) {
+  await updateDoc(doc(db, SOLICITUDES, solicitudId), { estado: "entregado" });
+}
+
 export async function buscarSolicitudActiva(clienteId) {
   const q = query(
     collection(db, SOLICITUDES),
