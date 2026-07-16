@@ -1,6 +1,6 @@
  import React, { useState, useEffect } from "react";
 import { MapPin, Droplet, Phone, Loader2, CheckCircle2, Truck, Clock } from "lucide-react";
-import { crearSolicitud, escucharSolicitud, cancelarSolicitud, buscarSolicitudActiva } from "./shared/firestoreHelpers";
+import { crearSolicitud, escucharSolicitud, cancelarSolicitud, marcarEntregado, buscarSolicitudActiva } from "./shared/firestoreHelpers";
 
 const COLORS = {
   clay: "#B5622A",
@@ -25,6 +25,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
   const [solicitudId, setSolicitudId] = useState(null);
   const [estadoPedido, setEstadoPedido] = useState("pendente");
   const [motorista, setMotorista] = useState(null);
+  const [confirmando, setConfirmando] = useState(false);
 
   useEffect(() => {
     if (!clienteId) return;
@@ -107,6 +108,20 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     } finally {
       setEnviando(false);
     }
+  }
+
+  async function confirmarEntrega() {
+    setConfirmando(true);
+    await marcarEntregado(solicitudId);
+    setEnviado(false);
+    setSolicitudId(null);
+    setUbicacion(null);
+    setTelefono("");
+    setLitros(0);
+    setMilesInput("0");
+    setEstadoPedido("pendente");
+    setMotorista(null);
+    setConfirmando(false);
   }
 
   useEffect(() => {
@@ -196,6 +211,15 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                   </p>
                 </div>
               </div>
+              <button
+                onClick={confirmarEntrega}
+                disabled={confirmando}
+                className="w-full rounded-xl py-3 text-sm font-semibold text-white mb-3 flex items-center justify-center gap-2"
+                style={{ background: confirmando ? COLORS.clayDark : COLORS.cobalt }}
+              >
+                {confirmando ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+                {confirmando ? "A confirmar..." : "Já recebi a água"}
+              </button>
               <button
                 onClick={async () => {
                   await cancelarSolicitud(solicitudId);
