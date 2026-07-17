@@ -358,7 +358,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
             </p>
           )}
 
-          <button
+           <button
             type="submit"
             disabled={enviando}
             className="w-full rounded-xl py-4 text-sm font-semibold tracking-wide transition"
@@ -370,7 +370,11 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
             {enviando ? "A enviar..." : "Pedir água"}
           </button>
         </form>
+
+        <p className="text-center text-xs mt-8" style={{ color: COLORS.clayDark, opacity: 0.6 }}>
+          Uma solução Verac Sistem
+        </p>
       </div>
     </div>
   );
-}
+                                                        }
