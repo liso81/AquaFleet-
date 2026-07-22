@@ -26,10 +26,10 @@ async function iniciarOneSignal(motoristaId) {
       await OneSignal.User.PushSubscription.optIn();
       OneSignal.User.addTag("rol", "motorista");
       OneSignal.login(motoristaId);
-    } catch (e) {
-      console.warn("OneSignal init falhou:", e);
-    }
-  });
+     
+  });} catch (e) {
+      alert("Erro OneSignal: " + e.message);
+  }
 }
 
 export default function App() {
