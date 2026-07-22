@@ -17,18 +17,18 @@ const COLORS = {
 
 const ONESIGNAL_APP_ID = "c7153a73-5046-4d50-8f4c-7f3ab4df77bb";
 
-async function iniciarOneSignal(motoristaId) {
-  if (!window.OneSignal) {
-    alert("OneSignal ainda não carregou.");
-    return;
-  }
+function iniciarOneSignal(motoristaId) {
+  alert("Iniciando OneSignal...");
   window.OneSignalDeferred = window.OneSignalDeferred || [];
-  window.OneSignalDeferred.push(async (OneSignal) => {
+  window.OneSignalDeferred.push(async function (OneSignal) {
     try {
+      alert("Dentro do OneSignalDeferred, a inicializar...");
       await OneSignal.init({ appId: ONESIGNAL_APP_ID });
+      alert("Init OK, a pedir permissão...");
       await OneSignal.User.PushSubscription.optIn();
       OneSignal.User.addTag("rol", "motorista");
       OneSignal.login(motoristaId);
+      alert("OneSignal configurado com sucesso!");
     } catch (e) {
       alert("Erro OneSignal: " + e.message);
     }
