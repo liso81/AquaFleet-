@@ -18,7 +18,10 @@ const COLORS = {
 const ONESIGNAL_APP_ID = "c7153a73-5046-4d50-8f4c-7f3ab4df77bb";
 
 async function iniciarOneSignal(motoristaId) {
-  if (!window.OneSignal) return;
+  if (!window.OneSignal) {
+    alert("OneSignal ainda não carregou.");
+    return;
+  }
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   window.OneSignalDeferred.push(async (OneSignal) => {
     try {
@@ -26,10 +29,10 @@ async function iniciarOneSignal(motoristaId) {
       await OneSignal.User.PushSubscription.optIn();
       OneSignal.User.addTag("rol", "motorista");
       OneSignal.login(motoristaId);
-     
-  });} catch (e) {
+    } catch (e) {
       alert("Erro OneSignal: " + e.message);
-  }
+    }
+  });
 }
 
 export default function App() {
