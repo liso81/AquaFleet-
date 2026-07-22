@@ -15,6 +15,23 @@ const COLORS = {
   line: "#E3D9C8",
 };
 
+const ONESIGNAL_APP_ID = "c7153a73-5046-4d50-8f4c-7f3ab4df77bb";
+
+async function iniciarOneSignal(motoristaId) {
+  if (!window.OneSignal) return;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async (OneSignal) => {
+    try {
+      await OneSignal.init({ appId: ONESIGNAL_APP_ID });
+      await OneSignal.User.PushSubscription.optIn();
+      OneSignal.User.addTag("rol", "motorista");
+      OneSignal.login(motoristaId);
+    } catch (e) {
+      console.warn("OneSignal init falhou:", e);
+    }
+  });
+}
+
 export default function App() {
   const [estado, setEstado] = useState("cargando");
   const [motorista, setMotorista] = useState(null);
@@ -35,6 +52,7 @@ export default function App() {
 
       setMotorista({ id: user.uid, nombre: perfil.nombre, telefono: perfil.telefono });
       setEstado("listo");
+      iniciarOneSignal(user.uid);
     });
 
     return () => unsubscribe();
