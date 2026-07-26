@@ -1,4 +1,4 @@
- import {
+import {
   collection,
   addDoc,
   doc,
@@ -14,7 +14,7 @@ import { db } from "./firebaseConfig";
 const SOLICITUDES = "solicitudes";
 
 export async function crearSolicitud({ clienteId, clienteTelefono, cantidadLitros, ubicacion, direccionTexto }) {
-  return addDoc(collection(db, SOLICITUDES), {
+  const docRef = await addDoc(collection(db, SOLICITUDES), {
     clienteId,
     clienteTelefono,
     cantidadLitros,
@@ -28,6 +28,15 @@ export async function crearSolicitud({ clienteId, clienteTelefono, cantidadLitro
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+
+  // Avisa a los motoristas por notificación push — si falla, no bloquea el pedido
+  fetch("/api/notificar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ cantidadLitros, direccionTexto }),
+  }).catch(() => {});
+
+  return docRef;
 }
 
 export function escucharSolicitud(solicitudId, callback) {
@@ -54,4 +63,4 @@ export async function buscarSolicitudActiva(clienteId) {
   if (snap.empty) return null;
   const d = snap.docs[0];
   return { id: d.id, ...d.data() };
-}
+} 
