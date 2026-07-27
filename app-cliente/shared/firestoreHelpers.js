@@ -1,4 +1,4 @@
- import {
+import {
   collection,
   addDoc,
   doc,
@@ -34,10 +34,7 @@ export async function crearSolicitud({ clienteId, clienteTelefono, cantidadLitro
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ cantidadLitros, direccionTexto }),
-  })
-    .then((r) => r.json())
-    .then((data) => alert(JSON.stringify(data)))
-    .catch((e) => alert("Erro fetch: " + e.message));
+  }).catch(() => {});
 
   return docRef;
 }
@@ -66,4 +63,4 @@ export async function buscarSolicitudActiva(clienteId) {
   if (snap.empty) return null;
   const d = snap.docs[0];
   return { id: d.id, ...d.data() };
-}
+} 
