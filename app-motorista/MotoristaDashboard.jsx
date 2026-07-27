@@ -1,4 +1,4 @@
- import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { MapPin, Phone, Droplet, Loader2, Navigation, Clock, CheckCircle2 } from "lucide-react";
 import { escucharPendientes, tomarPedido as tomarPedidoFirestore } from "./shared/firestoreHelpers";
 
@@ -37,6 +37,7 @@ export default function MotoristaDashboard({ motorista }) {
   const [tomandoId, setTomandoId] = useState(null);
   const [errorPorId, setErrorPorId] = useState({});
   const [errorCarga, setErrorCarga] = useState("");
+  const [precioPorId, setPrecioPorId] = useState({});
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -75,12 +76,18 @@ export default function MotoristaDashboard({ motorista }) {
   }, [solicitudes, miUbicacion]);
 
   async function tomarPedido(id) {
+    const precio = Number(precioPorId[id]);
+    if (!precio || precio <= 0) {
+      setErrorPorId((prev) => ({ ...prev, [id]: "Insira o preço combinado antes de aceitar." }));
+      return;
+    }
+
     setErrorPorId((prev) => ({ ...prev, [id]: null }));
     setTomandoId(id);
     const solicitud = solicitudes.find((s) => s.id === id);
     try {
-      await tomarPedidoFirestore(id, motorista);
-      if (solicitud) setMisPedidosTomados((prev) => [...prev, solicitud]);
+      await tomarPedidoFirestore(id, motorista, precio);
+      if (solicitud) setMisPedidosTomados((prev) => [...prev, { ...solicitud, precioAcordado: precio }]);
     } catch (e) {
       setErrorPorId((prev) => ({ ...prev, [id]: e.message }));
     } finally {
@@ -194,7 +201,7 @@ export default function MotoristaDashboard({ motorista }) {
                 <MapPin size={13} /> Ver localização no mapa
               </a>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 mb-2">
                 <button
                   onClick={() => llamar(s.clienteTelefono)}
                   className="flex-1 rounded-lg py-2.5 text-sm font-medium flex items-center justify-center gap-1.5"
@@ -202,21 +209,41 @@ export default function MotoristaDashboard({ motorista }) {
                 >
                   <Phone size={14} /> Ligar
                 </button>
-                <button
-                  onClick={() => tomarPedido(s.id)}
-                  disabled={tomandoId === s.id}
-                  className="flex-1 rounded-lg py-2.5 text-sm font-semibold text-white flex items-center justify-center gap-1.5"
-                  style={{ background: tomandoId === s.id ? COLORS.clayDark : COLORS.clay }}
-                >
-                  {tomandoId === s.id ? (
-                    <React.Fragment>
-                      <Loader2 size={14} className="animate-spin" /> A aceitar...
-                    </React.Fragment>
-                  ) : (
-                    "Aceitar pedido"
-                  )}
-                </button>
               </div>
+
+              <div
+                className="flex items-center rounded-lg px-3 mb-2"
+                style={{ background: COLORS.paper, border: `1px solid ${COLORS.line}` }}
+              >
+                <span className="text-sm" style={{ color: COLORS.clayDark, fontFamily: "'JetBrains Mono', monospace" }}>
+                  Kz
+                </span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="Preço combinado"
+                  value={precioPorId[s.id] || ""}
+                  onChange={(e) => setPrecioPorId((prev) => ({ ...prev, [s.id]: e.target.value }))}
+                  className="w-full bg-transparent py-2.5 px-2 outline-none text-sm"
+                  style={{ color: COLORS.ink }}
+                />
+              </div>
+
+              <button
+                onClick={() => tomarPedido(s.id)}
+                disabled={tomandoId === s.id}
+                className="w-full rounded-lg py-2.5 text-sm font-semibold text-white flex items-center justify-center gap-1.5"
+                style={{ background: tomandoId === s.id ? COLORS.clayDark : COLORS.clay }}
+              >
+                {tomandoId === s.id ? (
+                  <React.Fragment>
+                    <Loader2 size={14} className="animate-spin" /> A aceitar...
+                  </React.Fragment>
+                ) : (
+                  "Aceitar pedido"
+                )}
+              </button>
+
               {errorPorId[s.id] && (
                 <p className="text-xs mt-2" style={{ color: COLORS.clay }}>
                   {errorPorId[s.id]}
@@ -244,7 +271,7 @@ export default function MotoristaDashboard({ motorista }) {
                     className="ml-auto"
                     style={{ color: COLORS.cobalt, fontFamily: "'JetBrains Mono', monospace" }}
                   >
-                    {(s.cantidadLitros / 1000).toLocaleString()} mil L
+                    {s.precioAcordado ? `${Number(s.precioAcordado).toLocaleString()} Kz` : ""}
                   </span>
                 </div>
               ))}
@@ -254,4 +281,4 @@ export default function MotoristaDashboard({ motorista }) {
       </div>
     </div>
   );
-}
+} 
