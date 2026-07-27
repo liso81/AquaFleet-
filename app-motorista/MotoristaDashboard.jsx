@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { MapPin, Phone, Droplet, Loader2, Navigation, Clock, CheckCircle2 } from "lucide-react";
+ import React, { useState, useEffect, useMemo } from "react";
+import { MapPin, Phone, Droplet, Loader2, Navigation, Clock, CheckCircle2, SlidersHorizontal } from "lucide-react";
 import { escucharPendientes, tomarPedido as tomarPedidoFirestore } from "./shared/firestoreHelpers";
 
 const COLORS = {
@@ -39,6 +39,11 @@ export default function MotoristaDashboard({ motorista }) {
   const [errorCarga, setErrorCarga] = useState("");
   const [precioPorId, setPrecioPorId] = useState({});
 
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [localidadBusca, setLocalidadBusca] = useState("");
+  const [litrosMin, setLitrosMin] = useState("");
+  const [ordenPor, setOrdenPor] = useState("distancia"); // distancia | litros | recente
+
   useEffect(() => {
     if (!navigator.geolocation) {
       setBuscandoUbicacion(false);
@@ -68,12 +73,31 @@ export default function MotoristaDashboard({ motorista }) {
     return () => unsubscribe();
   }, []);
 
-  const pendientesOrdenadas = useMemo(() => {
-    if (!miUbicacion) return solicitudes;
-    return solicitudes
-      .map((s) => ({ ...s, distancia: distanciaKm(miUbicacion, s.ubicacion) }))
-      .sort((a, b) => a.distancia - b.distancia);
-  }, [solicitudes, miUbicacion]);
+  const pendientesFiltradas = useMemo(() => {
+    let lista = solicitudes.map((s) => ({
+      ...s,
+      distancia: miUbicacion ? distanciaKm(miUbicacion, s.ubicacion) : null,
+    }));
+
+    if (localidadBusca.trim()) {
+      const termo = localidadBusca.trim().toLowerCase();
+      lista = lista.filter((s) => (s.direccionTexto || "").toLowerCase().includes(termo));
+    }
+
+    if (litrosMin) {
+      const min = Number(litrosMin) * 1000;
+      lista = lista.filter((s) => s.cantidadLitros >= min);
+    }
+
+    if (ordenPor === "distancia" && miUbicacion) {
+      lista.sort((a, b) => a.distancia - b.distancia);
+    } else if (ordenPor === "litros") {
+      lista.sort((a, b) => b.cantidadLitros - a.cantidadLitros);
+    }
+    // "recente" ya viene ordenado desde Firestore (createdAt desc)
+
+    return lista;
+  }, [solicitudes, miUbicacion, localidadBusca, litrosMin, ordenPor]);
 
   async function tomarPedido(id) {
     const precio = Number(precioPorId[id]);
@@ -116,20 +140,105 @@ export default function MotoristaDashboard({ motorista }) {
             AquaFleet · Motorista
           </span>
         </div>
-        <h1 className="text-2xl font-semibold mb-1" style={{ color: COLORS.ink }}>
-          Pedidos perto de ti
-        </h1>
-        <p className="text-sm mb-6 flex items-center gap-1" style={{ color: COLORS.clayDark }}>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-2xl font-semibold" style={{ color: COLORS.ink }}>
+            Pedidos perto de ti
+          </h1>
+          <button
+            onClick={() => setMostrarFiltros((v) => !v)}
+            className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg"
+            style={{
+              color: mostrarFiltros ? "#fff" : COLORS.cobalt,
+              background: mostrarFiltros ? COLORS.cobalt : "transparent",
+              border: `1px solid ${COLORS.cobalt}`,
+            }}
+          >
+            <SlidersHorizontal size={13} /> Filtros
+          </button>
+        </div>
+        <p className="text-sm mb-4 flex items-center gap-1" style={{ color: COLORS.clayDark }}>
           {buscandoUbicacion ? (
             <React.Fragment>
               <Loader2 size={13} className="animate-spin" /> A localizar a tua posição...
             </React.Fragment>
           ) : (
             <React.Fragment>
-              <Navigation size={13} /> Ordenados por distância
+              <Navigation size={13} /> {pendientesFiltradas.length} pedido(s) encontrado(s)
             </React.Fragment>
           )}
         </p>
+
+        {mostrarFiltros && (
+          <div
+            className="rounded-xl p-4 mb-4 space-y-3"
+            style={{ background: "#fff", border: `1px solid ${COLORS.line}` }}
+          >
+            <div>
+              <label className="text-xs uppercase tracking-wide" style={{ color: COLORS.clayDark }}>
+                Localidade
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: Talatona, Viana..."
+                value={localidadBusca}
+                onChange={(e) => setLocalidadBusca(e.target.value)}
+                className="w-full mt-1 rounded-lg px-3 py-2 text-sm outline-none"
+                style={{ background: COLORS.paper, border: `1px solid ${COLORS.line}`, color: COLORS.ink }}
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wide" style={{ color: COLORS.clayDark }}>
+                Quantidade mínima (mil L)
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="Sem mínimo"
+                value={litrosMin}
+                onChange={(e) => setLitrosMin(e.target.value)}
+                className="w-full mt-1 rounded-lg px-3 py-2 text-sm outline-none"
+                style={{ background: COLORS.paper, border: `1px solid ${COLORS.line}`, color: COLORS.ink }}
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wide" style={{ color: COLORS.clayDark }}>
+                Ordenar por
+              </label>
+              <div className="flex gap-2 mt-1">
+                {[
+                  { id: "distancia", label: "Distância" },
+                  { id: "litros", label: "Quantidade" },
+                  { id: "recente", label: "Mais recente" },
+                ].map((op) => (
+                  <button
+                    key={op.id}
+                    onClick={() => setOrdenPor(op.id)}
+                    className="flex-1 rounded-lg py-2 text-xs font-medium"
+                    style={{
+                      background: ordenPor === op.id ? COLORS.cobalt : COLORS.paper,
+                      color: ordenPor === op.id ? "#fff" : COLORS.ink,
+                      border: `1px solid ${COLORS.line}`,
+                    }}
+                  >
+                    {op.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {(localidadBusca || litrosMin) && (
+              <button
+                onClick={() => {
+                  setLocalidadBusca("");
+                  setLitrosMin("");
+                }}
+                className="text-xs underline"
+                style={{ color: COLORS.clayDark }}
+              >
+                Limpar filtros
+              </button>
+            )}
+          </div>
+        )}
 
         {errorCarga && (
           <div className="rounded-xl p-4 text-sm mb-4" style={{ background: "#FDECEA", color: COLORS.clay }}>
@@ -146,17 +255,17 @@ export default function MotoristaDashboard({ motorista }) {
           </div>
         )}
 
-        {!cargandoSolicitudes && pendientesOrdenadas.length === 0 && (
+        {!cargandoSolicitudes && pendientesFiltradas.length === 0 && (
           <div
             className="rounded-xl p-6 text-center text-sm"
             style={{ background: "#fff", border: `1px solid ${COLORS.line}`, color: COLORS.clayDark }}
           >
-            Não há pedidos pendentes por agora.
+            Não há pedidos que correspondam aos filtros.
           </div>
         )}
 
         <div className="space-y-3">
-          {pendientesOrdenadas.map((s) => (
+          {pendientesFiltradas.map((s) => (
             <div
               key={s.id}
               className="rounded-xl p-4"
@@ -184,7 +293,7 @@ export default function MotoristaDashboard({ motorista }) {
                 style={{ color: COLORS.clayDark, fontFamily: "'JetBrains Mono', monospace" }}
               >
                 <span className="flex items-center gap-1">
-                  <Navigation size={12} /> {s.distancia ? s.distancia.toFixed(1) : "—"} km
+                  <Navigation size={12} /> {s.distancia !== null ? s.distancia.toFixed(1) : "—"} km
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock size={12} /> há {minutosDesde(Date.now())} min
@@ -281,4 +390,4 @@ export default function MotoristaDashboard({ motorista }) {
       </div>
     </div>
   );
-} 
+}
