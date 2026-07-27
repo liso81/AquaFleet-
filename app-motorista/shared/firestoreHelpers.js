@@ -1,9 +1,10 @@
- import {
+import {
   collection,
   addDoc,
   doc,
   setDoc,
   deleteDoc,
+  updateDoc,
   query,
   where,
   orderBy,
@@ -39,7 +40,7 @@ export function escucharPendientes(callback, onError) {
   );
 }
 
-export async function tomarPedido(solicitudId, motorista) {
+export async function tomarPedido(solicitudId, motorista, precioAcordado) {
   const ref = doc(db, SOLICITUDES, solicitudId);
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
@@ -51,8 +52,16 @@ export async function tomarPedido(solicitudId, motorista) {
       motoristaId: motorista.id,
       motoristaNombre: motorista.nombre,
       motoristaTelefono: motorista.telefono,
+      precioAcordado: precioAcordado,
       updatedAt: serverTimestamp(),
     });
+  });
+}
+
+export async function marcarEntregado(solicitudId) {
+  await updateDoc(doc(db, SOLICITUDES, solicitudId), {
+    estado: "entregado",
+    updatedAt: serverTimestamp(),
   });
 }
 
@@ -72,4 +81,4 @@ export function listarMotoristas(callback) {
   return onSnapshot(q, (snap) => {
     callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   });
-}
+} 
