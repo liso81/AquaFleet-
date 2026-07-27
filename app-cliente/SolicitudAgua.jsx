@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+ import React, { useState, useEffect } from "react";
 import { MapPin, Droplet, Phone, Loader2, CheckCircle2, Truck, Clock } from "lucide-react";
 import { crearSolicitud, escucharSolicitud, cancelarSolicitud, marcarEntregado, buscarSolicitudActiva } from "./shared/firestoreHelpers";
 
@@ -18,6 +18,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
   const [milesInput, setMilesInput] = useState("0");
   const [telefono, setTelefono] = useState("");
   const [ubicacion, setUbicacion] = useState(null);
+  const [direccionTexto, setDireccionTexto] = useState("");
   const [buscandoUbicacion, setBuscandoUbicacion] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
@@ -56,6 +57,24 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     setLitros(isNaN(num) ? 0 : num * 1000);
   }
 
+  async function obtenerDireccion(lat, lng) {
+    try {
+      const resp = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`
+      );
+      const data = await resp.json();
+      if (data && data.address) {
+        const a = data.address;
+        const partes = [a.road || a.suburb || a.neighbourhood, a.suburb && a.road ? a.suburb : null, a.city || a.town || a.village]
+          .filter(Boolean);
+        return partes.length > 0 ? partes.join(", ") : data.display_name || "";
+      }
+      return "";
+    } catch {
+      return "";
+    }
+  }
+
   function capturarUbicacion() {
     setError("");
     if (!navigator.geolocation) {
@@ -64,11 +83,12 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     }
     setBuscandoUbicacion(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUbicacion({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        });
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setUbicacion({ lat, lng });
+        const direccion = await obtenerDireccion(lat, lng);
+        setDireccionTexto(direccion);
         setBuscandoUbicacion(false);
       },
       () => {
@@ -99,6 +119,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
         clienteTelefono: telefono.trim(),
         cantidadLitros: litros,
         ubicacion,
+        direccionTexto: direccionTexto || null,
       });
       setSolicitudId(docRef.id);
       setEstadoPedido("pendente");
@@ -119,6 +140,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     setEnviado(false);
     setSolicitudId(null);
     setUbicacion(null);
+    setDireccionTexto("");
     setTelefono("");
     setLitros(0);
     setMilesInput("0");
@@ -345,7 +367,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                 {buscandoUbicacion
                   ? "A procurar localização..."
                   : ubicacion
-                  ? `${ubicacion.lat.toFixed(5)}, ${ubicacion.lng.toFixed(5)}`
+                  ? direccionTexto || `${ubicacion.lat.toFixed(5)}, ${ubicacion.lng.toFixed(5)}`
                   : "Partilhar a minha localização"}
               </span>
               {buscandoUbicacion && <Loader2 size={16} className="animate-spin" color={COLORS.cobalt} />}
@@ -397,4 +419,4 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
       </div>
     </div>
   );
-} 
+}
