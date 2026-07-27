@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { MapPin, Droplet, Phone, Loader2, CheckCircle2, Truck, Clock } from "lucide-react";
 import { crearSolicitud, escucharSolicitud, cancelarSolicitud, marcarEntregado, buscarSolicitudActiva } from "./shared/firestoreHelpers";
 
@@ -25,6 +25,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
   const [solicitudId, setSolicitudId] = useState(null);
   const [estadoPedido, setEstadoPedido] = useState("pendente");
   const [motorista, setMotorista] = useState(null);
+  const [precioAcordado, setPrecioAcordado] = useState(null);
   const [confirmando, setConfirmando] = useState(false);
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
         if (activa.motoristaId) {
           setMotorista({ nombre: activa.motoristaNombre, telefono: activa.motoristaTelefono });
         }
+        if (activa.precioAcordado) setPrecioAcordado(activa.precioAcordado);
         setEnviado(true);
       }
       setVerificandoActiva(false);
@@ -101,6 +103,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
       setSolicitudId(docRef.id);
       setEstadoPedido("pendente");
       setMotorista(null);
+      setPrecioAcordado(null);
       setEnviado(true);
       if (onSubmit) onSubmit({ id: docRef.id });
     } catch (err) {
@@ -121,6 +124,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     setMilesInput("0");
     setEstadoPedido("pendente");
     setMotorista(null);
+    setPrecioAcordado(null);
     setConfirmando(false);
   }
 
@@ -131,6 +135,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
       if (data.motoristaId) {
         setMotorista({ nombre: data.motoristaNombre, telefono: data.motoristaTelefono });
       }
+      if (data.precioAcordado) setPrecioAcordado(data.precioAcordado);
     });
     return () => unsubscribe();
   }, [solicitudId]);
@@ -190,8 +195,23 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                 O seu pedido foi aceite
               </h1>
               <p className="text-sm mb-6" style={{ color: COLORS.clayDark }}>
-                {motorista?.nombre} vai ligar para combinar o preço e a hora de entrega.
+                {motorista?.nombre} vai ligar para combinar a hora de entrega.
               </p>
+
+              {precioAcordado && (
+                <div
+                  className="rounded-xl p-4 mb-4 text-center"
+                  style={{ background: "#F3E3DC", border: `1px solid ${COLORS.clay}` }}
+                >
+                  <p className="text-xs uppercase tracking-wide mb-1" style={{ color: COLORS.clayDark }}>
+                    Preço combinado pelo motorista
+                  </p>
+                  <p className="text-2xl font-bold" style={{ color: COLORS.clay, fontFamily: "'JetBrains Mono', monospace" }}>
+                    {Number(precioAcordado).toLocaleString()} Kz
+                  </p>
+                </div>
+              )}
+
               <div
                 className="rounded-xl p-4 flex items-center gap-3 mb-4 text-left"
                 style={{ background: "#EEF4EF", border: `1px solid ${COLORS.cobalt}` }}
@@ -358,7 +378,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
             </p>
           )}
 
-           <button
+          <button
             type="submit"
             disabled={enviando}
             className="w-full rounded-xl py-4 text-sm font-semibold tracking-wide transition"
@@ -377,4 +397,4 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
       </div>
     </div>
   );
-                                                        }
+} 
