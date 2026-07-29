@@ -150,6 +150,12 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     setConfirmando(false);
   }
 
+  function llamarMotorista() {
+    if (motorista?.telefono) {
+      window.location.href = "tel:" + motorista.telefono.replace(/\s+/g, "");
+    }
+  }
+
   useEffect(() => {
     if (!solicitudId) return;
     const unsubscribe = escucharSolicitud(solicitudId, (data) => {
@@ -244,7 +250,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                 >
                   <Truck size={18} color="#fff" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="text-sm font-semibold" style={{ color: COLORS.ink }}>
                     {motorista?.nombre}
                   </p>
@@ -252,6 +258,13 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                     {motorista?.telefono}
                   </p>
                 </div>
+                <button
+                  onClick={llamarMotorista}
+                  className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: COLORS.cobalt }}
+                >
+                  <Phone size={15} color="#fff" />
+                </button>
               </div>
               <button
                 onClick={confirmarEntrega}
