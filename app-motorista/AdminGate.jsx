@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+ import React, { useState, useEffect } from "react";
 import { Lock, Loader2 } from "lucide-react";
 import AdminMotoristas from "./AdminMotoristas";
 
@@ -11,12 +11,11 @@ const COLORS = {
   line: "#E3D9C8",
 };
 
-const CLAVE_ADMIN = import.meta.env.VITE_ADMIN_PASSWORD;
-
 export default function AdminGate() {
   const [autorizado, setAutorizado] = useState(false);
   const [clave, setClave] = useState("");
   const [error, setError] = useState("");
+  const [verificando, setVerificando] = useState(false);
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_ok") === "1") {
@@ -24,13 +23,27 @@ export default function AdminGate() {
     }
   }, []);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (clave === CLAVE_ADMIN) {
-      sessionStorage.setItem("admin_ok", "1");
-      setAutorizado(true);
-    } else {
-      setError("Senha incorreta.");
+    setError("");
+    setVerificando(true);
+    try {
+      const resp = await fetch("/api/verificar-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clave }),
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        sessionStorage.setItem("admin_ok", "1");
+        setAutorizado(true);
+      } else {
+        setError(data.error || "Senha incorreta.");
+      }
+    } catch (err) {
+      setError("Erro de ligação. Tente novamente.");
+    } finally {
+      setVerificando(false);
     }
   }
 
@@ -70,12 +83,14 @@ export default function AdminGate() {
         )}
         <button
           type="submit"
-          className="w-full rounded-xl py-4 text-sm font-semibold text-white"
-          style={{ background: COLORS.clay }}
+          disabled={verificando}
+          className="w-full rounded-xl py-4 text-sm font-semibold text-white flex items-center justify-center gap-2"
+          style={{ background: verificando ? COLORS.clayDark : COLORS.clay }}
         >
-          Entrar
+          {verificando ? <Loader2 size={16} className="animate-spin" /> : null}
+          {verificando ? "A verificar..." : "Entrar"}
         </button>
       </form>
     </div>
   );
-    }
+}
