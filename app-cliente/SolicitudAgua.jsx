@@ -12,6 +12,8 @@ const COLORS = {
   line: "#E3D9C8",
 };
 
+const LITROS_MAX_MIL = 40;
+
 export default function SolicitudAgua({ clienteId, onSubmit }) {
   const [verificandoActiva, setVerificandoActiva] = useState(true);
   const [litros, setLitros] = useState(0);
@@ -52,8 +54,12 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
     if (limpio.length > 1) {
       limpio = limpio.replace(/^0+(?=\d)/, "");
     }
+    let num = parseFloat(limpio);
+    if (!isNaN(num) && num > LITROS_MAX_MIL) {
+      num = LITROS_MAX_MIL;
+      limpio = String(LITROS_MAX_MIL);
+    }
     setMilesInput(limpio);
-    const num = parseFloat(limpio);
     setLitros(isNaN(num) ? 0 : num * 1000);
   }
 
@@ -102,6 +108,14 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
   async function enviarSolicitud(e) {
     e.preventDefault();
     setError("");
+    if (litros <= 0) {
+      setError("Insira a quantidade de litros que deseja.");
+      return;
+    }
+    if (litros > LITROS_MAX_MIL * 1000) {
+      setError(`A quantidade máxima é ${LITROS_MAX_MIL} mil L.`);
+      return;
+    }
     if (!ubicacion) {
       setError("Primeiro partilhe a sua localização.");
       return;
@@ -359,6 +373,9 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
                 mil L
               </span>
             </div>
+            <p className="text-xs mt-1" style={{ color: COLORS.clayDark }}>
+              Máximo {LITROS_MAX_MIL} mil L por pedido
+            </p>
           </div>
 
           <div>
