@@ -14,10 +14,16 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
-initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider("6LflJ24tAAAAAMNxo1mFOLEMc-SIkVIrz9Quzo6M"),
-  isTokenAutoRefreshEnabled: true,
-});
+try {
+  const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider("6LflJ24tAAAAAMNxo1mFOLEMc-SIkVIrz9Quzo6M"),
+    isTokenAutoRefreshEnabled: true,
+  });
+  window.__appCheckDebug = "App Check inicializado sem erros aparentes.";
+} catch (e) {
+  window.__appCheckDebug = "ERRO ao inicializar App Check: " + e.message;
+  alert(window.__appCheckDebug);
+}
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
