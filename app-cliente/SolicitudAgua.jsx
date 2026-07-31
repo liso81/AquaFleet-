@@ -1,5 +1,5 @@
  import React, { useState, useEffect } from "react";
-import { MapPin, Droplet, Phone, Loader2, CheckCircle2, Truck, Clock } from "lucide-react";
+import { MapPin, Droplet, Phone, Loader2, CheckCircle2, Truck, Clock, MessageCircle } from "lucide-react";
 import { crearSolicitud, escucharSolicitud, cancelarSolicitud, marcarEntregado, buscarSolicitudActiva } from "./shared/firestoreHelpers";
 
 const COLORS = {
@@ -13,6 +13,24 @@ const COLORS = {
 };
 
 const LITROS_MAX_MIL = 40;
+const WHATSAPP_NUMERO = "244941183365";
+const WHATSAPP_MENSAJE = "Olá! Gostaria de partilhar a minha opinião sobre a app AquaFleet:";
+
+function BotaoWhatsApp() {
+  const link = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(WHATSAPP_MENSAJE)}`;
+  return (
+    <a
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fixed bottom-5 right-5 w-14 h-14 rounded-full flex items-center justify-center shadow-lg z-50"
+      style={{ background: "#25D366" }}
+      title="Enviar a sua opinião via WhatsApp"
+    >
+      <MessageCircle size={26} color="#fff" fill="#fff" />
+    </a>
+  );
+}
 
 export default function SolicitudAgua({ clienteId, onSubmit }) {
   const [verificandoActiva, setVerificandoActiva] = useState(true);
@@ -199,6 +217,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
         style={{ background: COLORS.paper, fontFamily: "'DM Sans', system-ui, sans-serif" }}
         className="min-h-screen flex items-center justify-center px-6"
       >
+        <BotaoWhatsApp />
         <div className="max-w-sm w-full text-center">
           {estadoPedido === "pendente" ? (
             <>
@@ -326,6 +345,7 @@ export default function SolicitudAgua({ clienteId, onSubmit }) {
       style={{ background: COLORS.paper, fontFamily: "'DM Sans', system-ui, sans-serif" }}
       className="min-h-screen px-5 py-8"
     >
+      <BotaoWhatsApp />
       <div className="max-w-sm mx-auto">
         <div className="flex items-center gap-2 mb-1">
           <div
