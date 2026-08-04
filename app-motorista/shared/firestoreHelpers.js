@@ -1,4 +1,4 @@
-import {
+ import {
   collection,
   addDoc,
   doc,
@@ -58,6 +58,17 @@ export async function tomarPedido(solicitudId, motorista, precioAcordado) {
   });
 }
 
+export async function cancelarPedidoMotorista(solicitudId) {
+  await updateDoc(doc(db, SOLICITUDES, solicitudId), {
+    estado: "pendente",
+    motoristaId: null,
+    motoristaNombre: null,
+    motoristaTelefono: null,
+    precioAcordado: null,
+    updatedAt: serverTimestamp(),
+  });
+}
+
 export async function marcarEntregado(solicitudId) {
   await updateDoc(doc(db, SOLICITUDES, solicitudId), {
     estado: "entregado",
@@ -81,4 +92,4 @@ export function listarMotoristas(callback) {
   return onSnapshot(q, (snap) => {
     callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   });
-} 
+}
