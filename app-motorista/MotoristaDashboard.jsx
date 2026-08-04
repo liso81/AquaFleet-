@@ -1,6 +1,6 @@
  import React, { useState, useEffect, useMemo } from "react";
-import { MapPin, Phone, Droplet, Loader2, Navigation, Clock, CheckCircle2, SlidersHorizontal } from "lucide-react";
-import { escucharPendientes, tomarPedido as tomarPedidoFirestore } from "./shared/firestoreHelpers";
+import { MapPin, Phone, Droplet, Loader2, Navigation, Clock, CheckCircle2, SlidersHorizontal, XCircle } from "lucide-react";
+import { escucharPendientes, tomarPedido as tomarPedidoFirestore, cancelarPedidoMotorista } from "./shared/firestoreHelpers";
 
 const COLORS = {
   clay: "#B5622A",
@@ -35,6 +35,7 @@ export default function MotoristaDashboard({ motorista }) {
   const [cargandoSolicitudes, setCargandoSolicitudes] = useState(true);
   const [misPedidosTomados, setMisPedidosTomados] = useState([]);
   const [tomandoId, setTomandoId] = useState(null);
+  const [cancelandoId, setCancelandoId] = useState(null);
   const [errorPorId, setErrorPorId] = useState({});
   const [errorCarga, setErrorCarga] = useState("");
   const [precioPorId, setPrecioPorId] = useState({});
@@ -94,7 +95,6 @@ export default function MotoristaDashboard({ motorista }) {
     } else if (ordenPor === "litros") {
       lista.sort((a, b) => b.cantidadLitros - a.cantidadLitros);
     }
-    // "recente" ya viene ordenado desde Firestore (createdAt desc)
 
     return lista;
   }, [solicitudes, miUbicacion, localidadBusca, litrosMin, ordenPor]);
@@ -116,6 +116,18 @@ export default function MotoristaDashboard({ motorista }) {
       setErrorPorId((prev) => ({ ...prev, [id]: e.message }));
     } finally {
       setTomandoId(null);
+    }
+  }
+
+  async function cancelarPedido(id) {
+    setCancelandoId(id);
+    try {
+      await cancelarPedidoMotorista(id);
+      setMisPedidosTomados((prev) => prev.filter((s) => s.id !== id));
+    } catch (e) {
+      alert("Erro ao cancelar: " + e.message);
+    } finally {
+      setCancelandoId(null);
     }
   }
 
@@ -371,17 +383,35 @@ export default function MotoristaDashboard({ motorista }) {
               {misPedidosTomados.map((s) => (
                 <div
                   key={s.id}
-                  className="rounded-lg p-3 flex items-center gap-2 text-sm"
+                  className="rounded-lg p-3"
                   style={{ background: "#EEF4EF", border: "1px solid " + COLORS.cobalt }}
                 >
-                  <CheckCircle2 size={16} color={COLORS.cobalt} />
-                  <span style={{ color: COLORS.ink }}>{s.clienteTelefono}</span>
-                  <span
-                    className="ml-auto"
-                    style={{ color: COLORS.cobalt, fontFamily: "'JetBrains Mono', monospace" }}
+                  <div className="flex items-center gap-2 text-sm mb-2">
+                    <CheckCircle2 size={16} color={COLORS.cobalt} />
+                    <span style={{ color: COLORS.ink }}>{s.clienteTelefono}</span>
+                    <span
+                      className="ml-auto"
+                      style={{ color: COLORS.cobalt, fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                      {s.precioAcordado ? `${Number(s.precioAcordado).toLocaleString()} Kz` : ""}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => cancelarPedido(s.id)}
+                    disabled={cancelandoId === s.id}
+                    className="w-full rounded-lg py-2 text-xs font-medium flex items-center justify-center gap-1.5"
+                    style={{ background: "#fff", border: `1px solid ${COLORS.clay}`, color: COLORS.clay }}
                   >
-                    {s.precioAcordado ? `${Number(s.precioAcordado).toLocaleString()} Kz` : ""}
-                  </span>
+                    {cancelandoId === s.id ? (
+                      <React.Fragment>
+                        <Loader2 size={13} className="animate-spin" /> A cancelar...
+                      </React.Fragment>
+                    ) : (
+                      <React.Fragment>
+                        <XCircle size={13} /> Cancelar pedido
+                      </React.Fragment>
+                    )}
+                  </button>
                 </div>
               ))}
             </div>
